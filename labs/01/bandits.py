@@ -36,12 +36,17 @@ class MultiArmedBandits():
 
 def main(env: MultiArmedBandits, args: argparse.Namespace) -> float:
     # TODO: Initialize the estimates for all bandits, to `args.initial`.
+    n = np.zeros(args.bandits, np.int32)
+    v = np.zeros(args.bandits, np.float32) + args.initial
 
     rewards = 0
     for step in range(args.episode_length):
         # TODO: Select either a greedy action (if `env.greedy(args.epsilon)` is True)
         # or uniformly random action (otherwise).
-        action = ...
+        if env.greedy(args.epsilon):
+            action = np.argmax(v)
+        else:
+            action = np.random.randint(args.bandits)
 
         # Perform the action.
         reward = env.step(action)
@@ -49,7 +54,8 @@ def main(env: MultiArmedBandits, args: argparse.Namespace) -> float:
 
         # TODO: Update parameters, either using averaging (when `args.alpha` == 0)
         # or by an update with a learning rate of `args.alpha`.
-        ...
+        n[action] += 1
+        v[action] += (reward - v[action]) * (args.alpha if args.alpha else 1 / n[action])
 
     return rewards / args.episode_length
 
